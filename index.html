@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson Check-In</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- QRCode Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white shadow-md">
+        <div class="max-w-md mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-lg font-bold tracking-wide">📚 Lesson Check-In</h1>
+            <button onclick="toggleView()" id="viewToggleBtn" class="text-xs bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-full font-medium transition">
+                Teacher Dashboard
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-md mx-auto px-4 py-6 w-full flex-grow">
+
+        <!-- STUDENT CHECK-IN VIEW -->
+        <div id="studentView" class="space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">✨</div>
+                <h2 class="text-xl font-bold text-slate-900">Welcome to Class!</h2>
+                <p class="text-sm text-slate-500 mt-1">Please enter your name below to mark your attendance for today's lesson.</p>
+                <div id="currentDate" class="text-xs font-semibold text-indigo-600 bg-indigo-50 inline-block px-3 py-1 rounded-full mt-3"></div>
+            </div>
+
+            <!-- Check-in Form -->
+            <form id="checkInForm" onsubmit="handleCheckIn(event)" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Your Full Name</label>
+                    <input type="text" id="studentName" required placeholder="e.g. Alex Smith" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Student ID / Email (Optional)</label>
+                    <input type="text" id="studentId" placeholder="e.g. S123456 or alex@school.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-md transition duration-200 text-sm">
+                    Confirm Attendance 🚀
+                </button>
+            </form>
+
+            <!-- Success Card (Hidden by default) -->
+            <div id="successCard" class="hidden bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center space-y-3">
+                <div class="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto text-xl font-bold shadow-sm">✓</div>
+                <h3 class="text-lg font-bold text-emerald-900">You're Checked In!</h3>
+                <p id="successMessage" class="text-sm text-emerald-700"></p>
+                <div class="bg-white p-3 rounded-xl border border-emerald-100 inline-block text-xs font-mono text-slate-600">
+                    Verification Code: <span id="verificationCode" class="font-bold text-emerald-800"></span>
+                </div>
+                <div>
+                    <button onclick="resetForm()" class="text-xs text-emerald-700 underline hover:text-emerald-900 font-medium mt-2">Check in another person</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEACHER DASHBOARD VIEW (Hidden by default) -->
+        <div id="teacherView" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center">
+                <h3 class="font-bold text-slate-900 mb-1">Lesson QR Code</h3>
+                <p class="text-xs text-slate-500 mb-4">Have students scan this code with their phone cameras to open this page.</p>
+                <div id="qrcode" class="p-3 bg-white border border-slate-200 rounded-xl shadow-inner mb-3"></div>
+                <p class="text-xs font-mono text-slate-400 break-all" id="currentUrlDisplay"></p>
+            </div>
+
+            <!-- Roster Summary -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-slate-900">Attendance Roster</h3>
+                        <p class="text-xs text-slate-500" id="totalCount">0 students checked in</p>
+                    </div>
+                    <div class="space-x-2">
+                        <button onclick="exportCSV()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-3 py-1.5 rounded-lg transition">Export CSV</button>
+                        <button onclick="clearData()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium px-3 py-1.5 rounded-lg transition">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Roster List -->
+                <div class="overflow-x-auto max-h-64 overflow-y-auto border border-slate-100 rounded-xl">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 text-slate-500 uppercase font-semibold sticky top-0">
+                            <tr>
+                                <th class="p-3">Name</th>
+                                <th class="p-3">ID / Email</th>
+                                <th class="p-3">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rosterTableBody" class="divide-y divide-slate-100">
+                            <!-- Rows injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-slate-400">
+        GitHub Pages Lesson Check-in System
+    </footer>
+
+    <!-- Script Logic -->
+    <script>
+        // Display today's formatted date
+        const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString(undefined, options);
+
+        // Load QR Code pointing to current page URL
+        const currentUrl = window.location.href;
+        document.getElementById('currentUrlDisplay').innerText = currentUrl;
+        
+        let qrGenerated = false;
+        function generateQRCode() {
+            if (!qrGenerated) {
+                document.getElementById("qrcode").innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), {
+                    text: currentUrl,
+                    width: 160,
+                    height: 160,
+                    colorDark : "#4f46e5",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+                qrGenerated = true;
+            }
+        }
+
+        // Toggle between Student and Teacher views
+        function toggleView() {
+            const studentView = document.getElementById('studentView');
+            const teacherView = document.getElementById('teacherView');
+            const btn = document.getElementById('viewToggleBtn');
+
+            if (studentView.classList.contains('hidden')) {
+                studentView.classList.remove('hidden');
+                teacherView.classList.add('hidden');
+                btn.innerText = 'Teacher Dashboard';
+            } else {
+                studentView.classList.add('hidden');
+                teacherView.classList.remove('hidden');
+                btn.innerText = 'Student Check-In';
+                generateQRCode();
+                loadRoster();
+            }
+        }
+
+        // Handle Check-in Form submission
+        function handleCheckIn(event) {
+            event.preventDefault();
+            const name = document.getElementById('studentName').value.trim();
+            const studentId = document.getElementById('studentId').value.trim() || 'N/A';
+            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateStr = new Date().toLocaleDateString();
+
+            const record = {
+                name,
+                studentId,
+                timestamp: `${dateStr} ${timestamp}`,
+                code: 'PASS-' + Math.random().toString(36).substring(2, 8).toUpperCase()
+            };
+
+            // Save to LocalStorage
+            let records = JSON.parse(localStorage.getItem('attendance_records') || '[]');
+            records.unshift(record); // Add to beginning
+            localStorage.setItem('attendance_records', JSON.stringify(records));
+
+            // Show Success Card
+            document.getElementById('checkInForm').classList.add('hidden');
+            document.getElementById('successCard').classList.remove('hidden');
+            document.getElementById('successMessage').innerText = `Thank you, ${name}! Your attendance has been successfully recorded.`;
+            document.getElementById('verificationCode').innerText = record.code;
+        }
+
+        function resetForm() {
+            document.getElementById('checkInForm').reset();
+            document.getElementById('checkInForm').classList.remove('hidden');
+            document.getElementById('successCard').classList.add('hidden');
+        }
+
+        // Load Roster into Teacher Dashboard
+        function loadRoster() {
+            const records = JSON.parse(localStorage.getItem('attendance_records') || '[]');
+            const tbody = document.getElementById('rosterTableBody');
+            document.getElementById('totalCount').innerText = `${records.length} student${records.length === 1 ? '' : 's'} checked in`;
+            
+            tbody.innerHTML = '';
+            if (records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400">No check-ins recorded yet.</td></tr>`;
+                return;
+            }
+
+            records.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-slate-900">${r.name}</td>
+                    <td class="p-3 text-slate-500">${r.studentId}</td>
+                    <td class="p-3 text-slate-500">${r.timestamp}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Export data to CSV
+        function exportCSV() {
+            const records = JSON.parse(localStorage.getItem('attendance_records') || '[]');
+            if (records.length === 0) {
+                alert('No records to export!');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Name,Student ID,Timestamp,Verification Code\n";
+            records.forEach(r => {
+                csvContent += `"${r.name}","${r.studentId}","${r.timestamp}","${r.code}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `attendance_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Clear data
+        function clearData() {
+            if (confirm('Are you sure you want to clear all attendance records?')) {
+                localStorage.removeItem('attendance_records');
+                loadRoster();
+            }
+        }
+    </script>
+</body>
+</html>
