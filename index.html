@@ -1,11 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RCCG - Lesson Check-In</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <!-- QRCode Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- Canvas Confetti -->
@@ -14,97 +32,173 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        .glass {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+        /* Light mode glassmorphism */
+        .glass-light {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
-        .bg-gradient-custom {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #4f46e5 100%);
+        /* Dark mode glassmorphism */
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.78);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        @keyframes pulse-subtle {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.03); }
+
+        /* Ambient Glowing Backdrops */
+        .glow-orb-1 {
+            position: fixed;
+            top: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 380px;
+            height: 380px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            transition: background 0.5s ease;
         }
-        .animate-pulse-subtle {
-            animation: pulse-subtle 3s infinite ease-in-out;
+        .glow-orb-2 {
+            position: fixed;
+            bottom: -10%;
+            right: -10%;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            transition: background 0.5s ease;
+        }
+
+        .dark .glow-orb-1 {
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
+        }
+        .dark .glow-orb-2 {
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+        }
+        .light .glow-orb-1 {
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+        }
+        .light .glow-orb-2 {
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+        }
+
+        @keyframes float-subtle {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: float-subtle 4s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar for Attendance Table */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.6);
         }
     </style>
 </head>
-<body class="bg-gradient-custom min-h-screen text-slate-800 flex flex-col justify-between font-sans antialiased">
+<body class="bg-slate-900 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased relative overflow-x-hidden transition-colors duration-300">
+
+    <!-- Ambient Glowing Backdrops -->
+    <div class="glow-orb-1"></div>
+    <div class="glow-orb-2"></div>
 
     <!-- Header -->
-    <header class="w-full max-w-lg mx-auto px-4 pt-6">
-        <div class="glass rounded-2xl px-5 py-4 shadow-xl flex justify-between items-center border border-white/40">
+    <header class="w-full max-w-lg mx-auto px-4 pt-6 z-10">
+        <div class="glass-light dark:glass-dark rounded-3xl px-5 py-3.5 shadow-2xl flex justify-between items-center transition-all duration-300">
             <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 rounded-full bg-white p-0.5 shadow-md flex items-center justify-center overflow-hidden border border-emerald-500/30">
-                    <img src="https://success-oye.github.io/church/image_1b0cf5.png" alt="RCCG Logo" class="w-full h-full object-contain">
+                <div class="w-12 h-12 rounded-2xl bg-white p-1 shadow-md flex items-center justify-center overflow-hidden border border-emerald-500/30 flex-shrink-0">
+                    <img src="https://success-oye.github.io/church/image_1b0cf5.png" alt="RCCG Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/100x100/1e293b/ffffff?text=RCCG'">
                 </div>
                 <div>
-                    <h1 class="font-black text-slate-900 text-sm tracking-tight leading-tight">RCCG</h1>
-                    <p class="text-[11px] text-indigo-700 font-bold">Lesson Check-In System</p>
-                    <p class="text-[10px] text-slate-500 font-medium" id="headerDate">Loading...</p>
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="font-black text-slate-900 dark:text-white text-sm tracking-tight leading-none">RCCG</h1>
+                        <span class="text-[9px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Live</span>
+                    </div>
+                    <p class="text-[11px] text-indigo-600 dark:text-indigo-400 font-bold mt-0.5">Lesson Attendance</p>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium" id="headerDate">Loading date...</p>
                 </div>
             </div>
-            <button onclick="openLoginModal()" id="teacherPortalBtn" class="text-xs bg-slate-900 hover:bg-slate-800 text-white font-semibold px-3.5 py-2 rounded-xl shadow transition duration-200 flex items-center gap-1.5">
-                <i class="fa-solid fa-lock text-[10px]"></i>
-                <span>Teacher</span>
-            </button>
+            
+            <div class="flex items-center gap-2">
+                <!-- Theme Toggle Button -->
+                <button onclick="toggleTheme()" id="themeToggleBtn" aria-label="Toggle Dark/Light Mode" class="p-2.5 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 transition duration-200 shadow-sm flex items-center justify-center">
+                    <i id="themeIcon" class="fa-solid fa-moon text-xs"></i>
+                </button>
+
+                <!-- Teacher Access Button -->
+                <button onclick="openLoginModal()" id="teacherPortalBtn" class="text-xs bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 active:scale-95 text-white font-bold px-3.5 py-2.5 rounded-2xl shadow-lg transition duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-user-shield text-xs text-indigo-400 dark:text-indigo-200"></i>
+                    <span>Teacher</span>
+                </button>
+            </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="w-full max-w-lg mx-auto px-4 py-6 flex-grow flex flex-col justify-center">
+    <main class="w-full max-w-lg mx-auto px-4 py-6 flex-grow flex flex-col justify-center z-10">
 
         <!-- STUDENT VIEW -->
         <div id="studentView" class="space-y-5">
             <!-- Welcome Card -->
-            <div class="glass p-6 rounded-3xl shadow-2xl text-center relative overflow-hidden border border-white/50">
-                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner animate-pulse-subtle">
+            <div class="glass-light dark:glass-dark p-6 rounded-3xl shadow-2xl text-center relative overflow-hidden transition-all duration-300">
+                <div class="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-purple-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg shadow-indigo-500/30 animate-float">
                     <i class="fa-solid fa-church"></i>
                 </div>
-                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Welcome to Class!</h2>
-                <p class="text-xs text-slate-600 mt-1 max-w-xs mx-auto font-medium">Please enter your details below to record your attendance for today's session[cite: 2].</p>
+                <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Welcome to Class!</h2>
+                <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-xs mx-auto font-medium">Please enter your details below to mark your attendance for today's session.</p>
             </div>
 
             <!-- Check-in Form Card -->
-            <div id="formCard" class="glass p-6 rounded-3xl shadow-2xl transition-all duration-300 border border-white/50">
+            <div id="formCard" class="glass-light dark:glass-dark p-6 rounded-3xl shadow-2xl transition-all duration-300">
                 <form id="checkInForm" onsubmit="handleCheckIn(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-user text-indigo-600"></i> Full Name <span class="text-rose-500">*</span>
+                        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-user text-indigo-600 dark:text-indigo-400"></i> Full Name <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" id="studentName" required placeholder="e.g. John Doe" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition shadow-sm">
+                        <input type="text" id="studentName" required placeholder="e.g. John Doe" class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold transition shadow-inner">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-id-card text-indigo-600"></i> Student ID or Email <span class="text-slate-400 font-normal">(Optional)</span>
+                        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-id-card text-indigo-600 dark:text-indigo-400"></i> Student ID or Email <span class="text-slate-400 dark:text-slate-500 font-normal">(Optional)</span>
                         </label>
-                        <input type="text" id="studentId" placeholder="e.g. S10294" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition shadow-sm">
+                        <input type="text" id="studentId" placeholder="e.g. S10294 or user@domain.com" class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold transition shadow-inner">
                     </div>
-                    <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-500/30 transition duration-200 text-sm flex items-center justify-center gap-2">
+                    <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 active:scale-[0.98] text-white font-extrabold py-4 rounded-2xl shadow-xl shadow-indigo-500/30 transition duration-200 text-sm flex items-center justify-center gap-2 tracking-wide">
                         <span>Confirm Attendance</span>
                         <i class="fa-solid fa-paper-plane text-xs"></i>
                     </button>
                 </form>
             </div>
 
-            <!-- Success Card -->
-            <div id="successCard" class="hidden glass p-6 rounded-3xl shadow-2xl text-center space-y-4 border-2 border-emerald-400">
-                <div class="w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto text-2xl shadow-lg shadow-emerald-500/40">
+            <!-- Success Confirmation Card -->
+            <div id="successCard" class="hidden glass-light dark:glass-dark p-6 rounded-3xl shadow-2xl text-center space-y-4 border-2 border-emerald-400/80 dark:border-emerald-500/80 transition-all duration-300">
+                <div class="w-16 h-16 bg-gradient-to-tr from-emerald-400 to-teal-500 text-white rounded-full flex items-center justify-center mx-auto text-2xl shadow-lg shadow-emerald-500/40">
                     <i class="fa-solid fa-check"></i>
                 </div>
                 <div>
-                    <h3 class="text-xl font-black text-slate-900">Welcome to class!</h3>
-                    <p class="text-sm font-bold text-indigo-700 mt-1">We are so glad you are here with us. 😊✝️</p>
-                    <p id="successMessage" class="text-xs text-slate-600 mt-1 font-medium"></p>
+                    <h3 class="text-2xl font-black text-slate-900 dark:text-white">Welcome to class!</h3>
+                    <p class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-1">We are so glad you are here with us. 😊✝️</p>
+                    <p id="successMessage" class="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium"></p>
                 </div>
-                <div class="bg-emerald-50/90 border border-emerald-200 p-3 rounded-2xl text-xs font-mono text-emerald-800 font-semibold inline-block shadow-sm">
-                    Verification Badge: <span id="verificationCode" class="text-emerald-900 font-bold"></span>
+                <div class="bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 p-3.5 rounded-2xl text-xs font-mono text-emerald-900 dark:text-emerald-200 font-semibold inline-block shadow-sm">
+                    Verification Code: <span id="verificationCode" class="text-emerald-700 dark:text-emerald-400 font-black"></span>
                 </div>
                 <div>
-                    <button type="button" onclick="resetForm()" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold underline mt-2">
+                    <button type="button" onclick="resetForm()" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-bold underline mt-2 transition">
                         Check in another person
                     </button>
                 </div>
@@ -113,56 +207,56 @@
 
         <!-- TEACHER DASHBOARD VIEW -->
         <div id="teacherView" class="hidden space-y-5">
-            <div class="glass p-5 rounded-3xl shadow-2xl flex justify-between items-center border border-white/50">
+            <div class="glass-light dark:glass-dark p-5 rounded-3xl shadow-2xl flex justify-between items-center transition-all duration-300">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold shadow-md">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-purple-500/30">
                         <i class="fa-solid fa-user-shield"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-900 text-sm">Teacher Dashboard</h3>
-                        <p class="text-xs text-slate-500">Logged in as <strong class="text-indigo-600">deacon</strong></p>
+                        <h3 class="font-extrabold text-slate-900 dark:text-white text-sm">Teacher Dashboard</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Logged in as <strong class="text-indigo-600 dark:text-indigo-400">deacon</strong></p>
                     </div>
                 </div>
-                <button onclick="exitTeacherView()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3.5 py-1.5 rounded-xl transition">
+                <button onclick="exitTeacherView()" class="text-xs bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold px-3.5 py-2 rounded-xl transition">
                     Logout
                 </button>
             </div>
 
             <!-- QR Code Card -->
-            <div class="glass p-6 rounded-3xl shadow-2xl text-center flex flex-col items-center border border-white/50">
-                <h3 class="font-bold text-slate-900 text-sm mb-1">Classroom QR Code</h3>
-                <p class="text-xs text-slate-500 mb-4 max-w-xs">Project or print this code for students to scan with their mobile devices.</p>
-                <div id="qrcode" class="p-4 bg-white rounded-2xl shadow-md border border-slate-100 mb-3"></div>
-                <p class="text-[10px] font-mono text-slate-400 break-all max-w-xs" id="currentUrlDisplay"></p>
+            <div class="glass-light dark:glass-dark p-6 rounded-3xl shadow-2xl text-center flex flex-col items-center transition-all duration-300">
+                <h3 class="font-extrabold text-slate-900 dark:text-white text-sm mb-1">Classroom QR Code</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-xs">Project or print this code for students to scan with their mobile devices.</p>
+                <div id="qrcode" class="p-4 bg-white rounded-2xl shadow-lg border border-slate-100 mb-3 flex items-center justify-center"></div>
+                <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500 break-all max-w-xs" id="currentUrlDisplay"></p>
             </div>
 
             <!-- Attendance Roster -->
-            <div class="glass p-6 rounded-3xl shadow-2xl space-y-4 border border-white/50">
+            <div class="glass-light dark:glass-dark p-6 rounded-3xl shadow-2xl space-y-4 transition-all duration-300">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h3 class="font-bold text-slate-900 text-sm">Live Attendance Roster</h3>
-                        <p class="text-xs text-indigo-600 font-bold" id="totalCount">0 students checked in</p>
+                        <h3 class="font-extrabold text-slate-900 dark:text-white text-sm">Live Attendance Roster</h3>
+                        <p class="text-xs text-indigo-600 dark:text-indigo-400 font-extrabold" id="totalCount">0 students checked in</p>
                     </div>
-                    <div class="space-x-1.5">
-                        <button onclick="exportCSV()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3.5 py-1.5 rounded-xl transition shadow-sm">
-                            <i class="fa-solid fa-download mr-1"></i> Export CSV
+                    <div class="space-x-1.5 flex items-center">
+                        <button onclick="exportCSV()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-2 rounded-xl transition shadow-sm flex items-center gap-1">
+                            <i class="fa-solid fa-download"></i> CSV
                         </button>
-                        <button onclick="clearData()" class="text-xs bg-rose-100 hover:bg-rose-200 text-rose-700 font-semibold px-3.5 py-1.5 rounded-xl transition">
+                        <button onclick="clearData()" class="text-xs bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-200 dark:hover:bg-rose-900 text-rose-700 dark:text-rose-300 font-bold px-3.5 py-2 rounded-xl transition">
                             Clear
                         </button>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto max-h-60 overflow-y-auto border border-slate-200/60 rounded-2xl bg-white/50">
+                <div class="overflow-x-auto max-h-60 overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-2xl bg-white/60 dark:bg-slate-900/60 shadow-inner">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-100/90 text-slate-600 font-bold uppercase sticky top-0 backdrop-blur-sm">
+                        <thead class="bg-slate-100/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 font-black uppercase sticky top-0 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
                             <tr>
                                 <th class="p-3">Name</th>
                                 <th class="p-3">ID / Email</th>
                                 <th class="p-3">Time</th>
                             </tr>
                         </thead>
-                        <tbody id="rosterTableBody" class="divide-y divide-slate-100 font-medium">
+                        <tbody id="rosterTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
                             <!-- Injected by JS -->
                         </tbody>
                     </table>
@@ -173,38 +267,96 @@
     </main>
 
     <!-- TEACHER LOGIN MODAL -->
-    <div id="loginModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="glass max-w-sm w-full p-6 rounded-3xl shadow-2xl relative space-y-4 border border-white/60">
-            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg">
+    <div id="loginModal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-light dark:glass-dark max-w-sm w-full p-6 rounded-3xl shadow-2xl relative space-y-4 transition-all duration-300">
+            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg transition">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div class="text-center">
-                <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl font-bold shadow-inner">
+                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl font-bold shadow-inner">
                     <i class="fa-solid fa-lock"></i>
                 </div>
-                <h3 class="text-lg font-black text-slate-900">Teacher Portal Authentication</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Please enter credentials to access admin controls.</p>
+                <h3 class="text-lg font-black text-slate-900 dark:text-white">Teacher Portal</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Please enter credentials to access admin controls.</p>
             </div>
             <form onsubmit="handleTeacherLogin(event)" class="space-y-3">
                 <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Username</label>
-                    <input type="text" id="loginUsername" required placeholder="Enter username" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white/80">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">Username</label>
+                    <input type="text" id="loginUsername" required placeholder="Enter username" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none font-medium">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Password</label>
-                    <input type="password" id="loginPassword" required placeholder="Enter password" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white/80">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="Enter password" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none font-medium">
                 </div>
-                <p id="loginError" class="hidden text-xs text-rose-600 font-bold text-center"></p>
-                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl shadow-md text-sm transition">
+                <p id="loginError" class="hidden text-xs text-rose-600 dark:text-rose-400 font-bold text-center"></p>
+                <button type="submit" class="w-full bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-md text-sm transition">
                     Unlock Dashboard
                 </button>
             </form>
         </div>
     </div>
 
-    <footer class="text-center py-4 text-[11px] text-white/70 font-medium">
+    <!-- Notification / Toast Message -->
+    <div id="toast" class="fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toastInner" class="bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold flex items-center gap-2">
+            <i id="toastIcon" class="fa-solid fa-circle-info"></i>
+            <span id="toastText">Notification message</span>
+        </div>
+    </div>
+
+    <footer class="text-center py-4 text-[11px] text-slate-500 dark:text-indigo-200/60 font-medium z-10">
         RCCG GitHub Pages Lesson Attendance System
     </footer>
+
+    <!-- Theme Logic (Pre-script for theme initialization) -->
+    <script>
+        function applyInitialTheme() {
+            const savedTheme = localStorage.getItem('rccg_theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+                updateThemeUI(true);
+            } else {
+                document.documentElement.classList.add('light');
+                document.documentElement.classList.remove('dark');
+                updateThemeUI(false);
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+                localStorage.setItem('rccg_theme', 'light');
+                updateThemeUI(false);
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+                localStorage.setItem('rccg_theme', 'dark');
+                updateThemeUI(true);
+            }
+            // Re-render QR Code with adjusted dark colors if QR exists
+            if (typeof window.generateQRCode === 'function' && window.qrGenerated) {
+                window.generateQRCode(true);
+            }
+        }
+
+        function updateThemeUI(isDark) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                if (isDark) {
+                    icon.className = 'fa-solid fa-sun text-amber-400 text-xs';
+                } else {
+                    icon.className = 'fa-solid fa-moon text-indigo-600 text-xs';
+                }
+            }
+        }
+
+        applyInitialTheme();
+    </script>
 
     <!-- Firebase SDK & Core Logic Module -->
     <script type="module">
@@ -238,19 +390,22 @@
         const currentUrl = window.location.href;
         document.getElementById('currentUrlDisplay').innerText = currentUrl;
         
-        let qrGenerated = false;
-        window.generateQRCode = function() {
-            if (!qrGenerated) {
-                document.getElementById("qrcode").innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), {
+        window.qrGenerated = false;
+        window.generateQRCode = function(forceRegen = false) {
+            if (!window.qrGenerated || forceRegen) {
+                const qrContainer = document.getElementById("qrcode");
+                qrContainer.innerHTML = "";
+                
+                const isDark = document.documentElement.classList.contains('dark');
+                new QRCode(qrContainer, {
                     text: currentUrl,
                     width: 160,
                     height: 160,
-                    colorDark : "#1e3c72",
+                    colorDark : isDark ? "#0f172a" : "#1e1b4b",
                     colorLight : "#ffffff",
                     correctLevel : QRCode.CorrectLevel.H
                 });
-                qrGenerated = true;
+                window.qrGenerated = true;
             }
         };
 
@@ -292,7 +447,7 @@
                 playChime();
                 if (typeof confetti === 'function') {
                     confetti({
-                        particleCount: 100,
+                        particleCount: 110,
                         spread: 70,
                         origin: { y: 0.6 }
                     });
@@ -303,7 +458,7 @@
                 document.getElementById('successMessage').innerText = `Thank you for checking in, ${name}! Have a blessed session.`;
                 document.getElementById('verificationCode').innerText = record.code;
             }).catch(error => {
-                alert("Error saving check-in: " + error.message);
+                showToast("Error saving check-in: " + error.message, "error");
             });
         };
 
@@ -318,16 +473,17 @@
             if (!tbody) return;
             tbody.innerHTML = '';
             if (globalRecords.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 font-normal">No check-ins recorded yet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 dark:text-slate-500 font-normal">No check-ins recorded yet.</td></tr>`;
                 return;
             }
 
             globalRecords.forEach(r => {
                 const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors";
                 tr.innerHTML = `
-                    <td class="p-3 font-semibold text-slate-800">${r.name}</td>
-                    <td class="p-3 text-slate-500">${r.studentId}</td>
-                    <td class="p-3 text-slate-500">${r.timestamp}</td>
+                    <td class="p-3 font-semibold text-slate-800 dark:text-slate-200">${escapeHtml(r.name)}</td>
+                    <td class="p-3 text-slate-500 dark:text-slate-400">${escapeHtml(r.studentId)}</td>
+                    <td class="p-3 text-slate-500 dark:text-slate-400">${escapeHtml(r.timestamp)}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -335,13 +491,15 @@
 
         window.clearData = function() {
             if (confirm('Are you sure you want to clear all attendance records across all devices?')) {
-                remove(attendanceRef);
+                remove(attendanceRef).then(() => {
+                    showToast("Attendance records cleared", "info");
+                });
             }
         };
 
         window.exportCSV = function() {
             if (globalRecords.length === 0) {
-                alert('No attendance records to export!');
+                showToast("No attendance records to export!", "warning");
                 return;
             }
 
@@ -357,7 +515,14 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            showToast("CSV downloaded successfully!", "success");
         };
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
     </script>
 
     <!-- UI Helper Script -->
@@ -411,7 +576,7 @@
                 const osc1 = ctx.createOscillator();
                 const gain1 = ctx.createGain();
                 osc1.type = 'sine';
-                osc1.frequency.setValueAtTime(523.25, now);
+                osc1.frequency.setValueAtTime(523.25, now); // C5
                 gain1.gain.setValueAtTime(0.3, now);
                 gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
                 osc1.connect(gain1);
@@ -422,14 +587,16 @@
                 const osc2 = ctx.createOscillator();
                 const gain2 = ctx.createGain();
                 osc2.type = 'sine';
-                osc2.frequency.setValueAtTime(659.25, now + 0.15);
+                osc2.frequency.setValueAtTime(659.25, now + 0.15); // E5
                 gain2.gain.setValueAtTime(0.3, now + 0.15);
                 gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
                 osc2.connect(gain2);
                 gain2.connect(ctx.destination);
                 osc2.start(now + 0.15);
                 osc2.stop(now + 0.8);
-            } catch(e) {}
+            } catch(e) {
+                console.log("Audio not allowed or supported on this context.");
+            }
         }
 
         function resetForm() {
@@ -437,6 +604,32 @@
             if (form) form.reset();
             document.getElementById('formCard').classList.remove('hidden');
             document.getElementById('successCard').classList.add('hidden');
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toastText');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastText.innerText = message;
+            
+            if (type === 'error') {
+                toastIcon.className = "fa-solid fa-circle-exclamation text-rose-400";
+            } else if (type === 'warning') {
+                toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-400";
+            } else if (type === 'success') {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-indigo-400";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
         }
     </script>
 </body>
