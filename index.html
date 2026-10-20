@@ -208,6 +208,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyApvTYm0-HOa7HPkNZuXx-W3lFv6HLEiTw",
@@ -216,10 +217,12 @@
             storageBucket: "church-2d8a4.firebasestorage.app",
             messagingSenderId: "78543968175",
             appId: "1:78543968175:web:5749c5d29b43b63088415a",
-            databaseURL: "https://church-2d8a4-default-rtdb.firebaseio.com"
+            databaseURL: "https://church-2d8a4-default-rtdb.firebaseio.com",
+            measurementId: "G-X84GMPN5MB"
         };
 
         const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
         const db = getDatabase(app);
         const attendanceRef = ref(db, 'attendance');
 
