@@ -204,7 +204,7 @@
         GitHub Pages Lesson Attendance System
     </footer>
 
-    <!-- Combined Scripts -->
+    <!-- Firebase SDK & Core Logic Module -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -249,7 +249,7 @@
             }
         };
 
-        // Realtime Listener
+        // Realtime Listener for Live Roster
         onValue(attendanceRef, (snapshot) => {
             const data = snapshot.val();
             globalRecords = [];
@@ -263,7 +263,7 @@
             }
         });
 
-        // Submit Check-In Function attached globally
+        // Global Check-In Handler
         window.handleCheckIn = function(event) {
             event.preventDefault();
             const nameField = document.getElementById('studentName');
@@ -302,7 +302,7 @@
             });
         };
 
-        // Load Roster
+        // Populate Roster Table
         window.loadRoster = function() {
             const tbody = document.getElementById('rosterTableBody');
             const totalCountEl = document.getElementById('totalCount');
@@ -355,6 +355,7 @@
         };
     </script>
 
+    <!-- UI Helper Script -->
     <script>
         function openLoginModal() {
             document.getElementById('loginModal').classList.remove('hidden');
