@@ -82,7 +82,7 @@
                         </label>
                         <input type="text" id="studentId" placeholder="e.g. S10294" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition shadow-sm">
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-500/30 transition duration-200 text-sm flex items-center justify-center gap-2">
+                    <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-500/30 transition duration-200 text-sm flex items-center justify-center gap-2">
                         <span>Confirm Attendance</span>
                         <i class="fa-solid fa-paper-plane text-xs"></i>
                     </button>
@@ -204,7 +204,29 @@
         GitHub Pages Lesson Attendance System
     </footer>
 
-    <script>
+    <!-- Firebase SDK Modular Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Your Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyApvTYm0-HOa7HPkNZuXx-W3lFv6HLEiTw",
+            authDomain: "church-2d8a4.firebaseapp.com",
+            projectId: "church-2d8a4",
+            storageBucket: "church-2d8a4.firebasestorage.app",
+            messagingSenderId: "78543968175",
+            appId: "1:78543968175:web:5749c5d29b43b63088415a",
+            databaseURL: "https://church-2d8a4-default-rtdb.firebaseio.com"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const attendanceRef = ref(db, 'attendance');
+
+        let globalRecords = [];
+
         // Set date
         const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
         document.getElementById('headerDate').innerText = new Date().toLocaleDateString(undefined, options);
@@ -214,7 +236,7 @@
         document.getElementById('currentUrlDisplay').innerText = currentUrl;
         
         let qrGenerated = false;
-        function generateQRCode() {
+        window.generateQRCode = function() {
             if (!qrGenerated) {
                 document.getElementById("qrcode").innerHTML = "";
                 new QRCode(document.getElementById("qrcode"), {
@@ -227,9 +249,108 @@
                 });
                 qrGenerated = true;
             }
-        }
+        };
 
-        // Login Modal Controls
+        // Realtime Listener across all devices
+        onValue(attendanceRef, (snapshot) => {
+            const data = snapshot.val();
+            globalRecords = [];
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    globalRecords.unshift(data[key]);
+                });
+            }
+            loadRoster();
+        });
+
+        // Submit Check-In
+        window.handleCheckIn = function(event) {
+            event.preventDefault();
+            const name = document.getElementById('studentName').value.trim();
+            const studentId = document.getElementById('studentId').value.trim() || 'N/A';
+            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateStr = new Date().toLocaleDateString();
+
+            const record = {
+                name,
+                studentId,
+                timestamp: `${dateStr} ${timestamp}`,
+                code: 'PASS-' + Math.random().toString(36).substring(2, 8).toUpperCase()
+            };
+
+            // Push to Firebase Realtime Database
+            push(attendanceRef, record).then(() => {
+                playChime();
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 80,
+                        spread: 60,
+                        origin: { y: 0.6 }
+                    });
+                }
+
+                document.getElementById('formCard').classList.add('hidden');
+                document.getElementById('successCard').classList.remove('hidden');
+                document.getElementById('successMessage').innerText = `Welcome, ${name}! Your attendance has been recorded successfully.`;
+                document.getElementById('verificationCode').innerText = record.code;
+            }).catch(error => {
+                alert("Error saving check-in: " + error.message);
+            });
+        };
+
+        // Load Roster into Teacher Dashboard
+        window.loadRoster = function() {
+            const tbody = document.getElementById('rosterTableBody');
+            document.getElementById('totalCount').innerText = `${globalRecords.length} student${globalRecords.length === 1 ? '' : 's'} checked in`;
+            
+            tbody.innerHTML = '';
+            if (globalRecords.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 font-normal">No check-ins recorded yet.</td></tr>`;
+                return;
+            }
+
+            globalRecords.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-800">${r.name}</td>
+                    <td class="p-3 text-slate-500">${r.studentId}</td>
+                    <td class="p-3 text-slate-500">${r.timestamp}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        // Clear All Data
+        window.clearData = function() {
+            if (confirm('Are you sure you want to clear all attendance records across all devices?')) {
+                remove(attendanceRef);
+            }
+        };
+
+        // Export CSV
+        window.exportCSV = function() {
+            if (globalRecords.length === 0) {
+                alert('No attendance records to export!');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Name,Student ID / Email,Timestamp,Verification Code\n";
+            globalRecords.forEach(r => {
+                csvContent += `"${r.name}","${r.studentId}","${r.timestamp}","${r.code}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `attendance_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+    </script>
+
+    <script>
+        // Non-module helpers (Modal, Audio)
         function openLoginModal() {
             document.getElementById('loginModal').classList.remove('hidden');
             document.getElementById('loginUsername').focus();
@@ -261,8 +382,8 @@
             document.getElementById('studentView').classList.add('hidden');
             document.getElementById('teacherView').classList.remove('hidden');
             document.getElementById('teacherPortalBtn').classList.add('hidden');
-            generateQRCode();
-            loadRoster();
+            if (window.generateQRCode) window.generateQRCode();
+            if (window.loadRoster) window.loadRoster();
         }
 
         function exitTeacherView() {
@@ -271,7 +392,6 @@
             document.getElementById('teacherPortalBtn').classList.remove('hidden');
         }
 
-        // Audio Chime (Web Audio API)
         function playChime() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -280,7 +400,7 @@
                 const osc1 = ctx.createOscillator();
                 const gain1 = ctx.createGain();
                 osc1.type = 'sine';
-                osc1.frequency.setValueAtTime(523.25, now); // C5
+                osc1.frequency.setValueAtTime(523.25, now);
                 gain1.gain.setValueAtTime(0.3, now);
                 gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
                 osc1.connect(gain1);
@@ -291,7 +411,7 @@
                 const osc2 = ctx.createOscillator();
                 const gain2 = ctx.createGain();
                 osc2.type = 'sine';
-                osc2.frequency.setValueAtTime(659.25, now + 0.15); // E5
+                osc2.frequency.setValueAtTime(659.25, now + 0.15);
                 gain2.gain.setValueAtTime(0.3, now + 0.15);
                 gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
                 osc2.connect(gain2);
@@ -301,96 +421,10 @@
             } catch(e) {}
         }
 
-        // Handle Form Submission
-        function handleCheckIn(event) {
-            event.preventDefault();
-            const name = document.getElementById('studentName').value.trim();
-            const studentId = document.getElementById('studentId').value.trim() || 'N/A';
-            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const dateStr = new Date().toLocaleDateString();
-
-            const record = {
-                name,
-                studentId,
-                timestamp: `${dateStr} ${timestamp}`,
-                code: 'PASS-' + Math.random().toString(36).substring(2, 8).toUpperCase()
-            };
-
-            let records = JSON.parse(localStorage.getItem('attendance_records') || '[]');
-            records.unshift(record);
-            localStorage.setItem('attendance_records', JSON.stringify(records));
-
-            // Visual + Sound Effects
-            playChime();
-            if (typeof confetti === 'function') {
-                confetti({
-                    particleCount: 80,
-                    spread: 60,
-                    origin: { y: 0.6 }
-                });
-            }
-
-            document.getElementById('formCard').classList.add('hidden');
-            document.getElementById('successCard').classList.remove('hidden');
-            document.getElementById('successMessage').innerText = `Welcome, ${name}! Your attendance has been recorded successfully.`;
-            document.getElementById('verificationCode').innerText = record.code;
-        }
-
         function resetForm() {
             document.getElementById('checkInForm').reset();
             document.getElementById('formCard').classList.remove('hidden');
             document.getElementById('successCard').classList.add('hidden');
-        }
-
-        // Load Roster Table
-        function loadRoster() {
-            const records = JSON.parse(localStorage.getItem('attendance_records') || '[]');
-            const tbody = document.getElementById('rosterTableBody');
-            document.getElementById('totalCount').innerText = `${records.length} student${records.length === 1 ? '' : 's'} checked in`;
-            
-            tbody.innerHTML = '';
-            if (records.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 font-normal">No check-ins recorded yet.</td></tr>`;
-                return;
-            }
-
-            records.forEach(r => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-3 font-semibold text-slate-800">${r.name}</td>
-                    <td class="p-3 text-slate-500">${r.studentId}</td>
-                    <td class="p-3 text-slate-500">${r.timestamp}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function exportCSV() {
-            const records = JSON.parse(localStorage.getItem('attendance_records') || '[]');
-            if (records.length === 0) {
-                alert('No attendance records to export!');
-                return;
-            }
-
-            let csvContent = "data:text/csv;charset=utf-8,Name,Student ID / Email,Timestamp,Verification Code\n";
-            records.forEach(r => {
-                csvContent += `"${r.name}","${r.studentId}","${r.timestamp}","${r.code}"\n`;
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `attendance_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function clearData() {
-            if (confirm('Are you sure you want to clear all attendance records?')) {
-                localStorage.removeItem('attendance_records');
-                loadRoster();
-            }
         }
     </script>
 </body>
