@@ -186,21 +186,43 @@
                 <form id="checkInForm" onsubmit="handleCheckIn(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-black uppercase tracking-wider text-indigo-950 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-user text-pink-500 dark:text-indigo-400"></i> Full Name <span class="text-rose-500">*</span>
+                            <i class="fa-solid fa-user text-purple-600 dark:text-indigo-400"></i> Full Name <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" id="studentName" required placeholder="e.g. John Doe" class="w-full px-4 py-3.5 rounded-2xl border-2 border-indigo-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm font-semibold transition shadow-inner">
+                        <input type="text" id="studentName" required placeholder="e.g. John Doe" class="w-full px-4 py-3.5 rounded-2xl border-2 border-indigo-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-semibold transition shadow-inner">
                     </div>
                     <div>
                         <label class="block text-xs font-black uppercase tracking-wider text-indigo-950 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-id-card text-purple-600 dark:text-indigo-400"></i> Student ID or Email <span class="text-slate-500 dark:text-slate-400 font-normal">(Optional)</span>
+                            <i class="fa-solid fa-chalkboard-user text-purple-600 dark:text-indigo-400"></i> Name of Teacher <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" id="studentId" placeholder="e.g. S10294 or user@domain.com" class="w-full px-4 py-3.5 rounded-2xl border-2 border-indigo-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-semibold transition shadow-inner">
+                        <input type="text" id="sundaySchoolClass" required placeholder="e.g. Deacon Smith, Sister Mary" class="w-full px-4 py-3.5 rounded-2xl border-2 border-indigo-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-semibold transition shadow-inner">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-wider text-indigo-950 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-book-open text-indigo-600 dark:text-indigo-400"></i> Lesson Topic <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" id="lessonTopic" required placeholder="e.g. The Armor of God" class="w-full px-4 py-3.5 rounded-2xl border-2 border-indigo-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold transition shadow-inner">
                     </div>
                     <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 active:scale-[0.98] text-white font-black py-4 rounded-2xl shadow-xl shadow-pink-500/30 transition duration-200 text-sm flex items-center justify-center gap-2 tracking-wider uppercase">
                         <span>Confirm Attendance</span>
                         <i class="fa-solid fa-paper-plane text-xs"></i>
                     </button>
                 </form>
+
+                <!-- Daily Scripture Card Section -->
+                <div class="mt-6 pt-5 border-t-2 border-indigo-100/60 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-black uppercase tracking-wider text-purple-700 dark:text-indigo-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-book-bible text-pink-500"></i> Scripture of the Day
+                        </span>
+                        <button type="button" onclick="getRandomVerse()" class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-indigo-300 transition flex items-center gap-1 bg-white/60 dark:bg-slate-800/60 px-2 py-1 rounded-lg border border-slate-200/50 dark:border-slate-700">
+                            <i class="fa-solid fa-arrows-rotate"></i> New Verse
+                        </button>
+                    </div>
+                    <div class="bg-gradient-to-r from-indigo-50/80 via-purple-50/80 to-pink-50/80 dark:from-slate-900/90 dark:via-indigo-950/40 dark:to-slate-900/90 border border-indigo-200/70 dark:border-slate-800 p-3.5 rounded-2xl shadow-inner relative overflow-hidden">
+                        <p id="verseText" class="text-xs italic font-medium text-slate-800 dark:text-slate-200 leading-relaxed mb-2">"Loading verse..."</p>
+                        <p id="verseRef" class="text-[11px] font-black text-right text-purple-700 dark:text-indigo-400">— Loading...</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Success Confirmation Card -->
@@ -271,7 +293,8 @@
                         <thead class="bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-slate-800 dark:to-slate-800 text-slate-800 dark:text-slate-200 font-black uppercase sticky top-0 backdrop-blur-sm border-b border-indigo-200 dark:border-slate-700">
                             <tr>
                                 <th class="p-3">Name</th>
-                                <th class="p-3">ID / Email</th>
+                                <th class="p-3">Teacher</th>
+                                <th class="p-3">Topic</th>
                                 <th class="p-3">Time</th>
                             </tr>
                         </thead>
@@ -452,18 +475,21 @@
         window.handleCheckIn = function(event) {
             event.preventDefault();
             const nameField = document.getElementById('studentName');
-            const idField = document.getElementById('studentId');
+            const classField = document.getElementById('sundaySchoolClass');
+            const topicField = document.getElementById('lessonTopic');
             
             if (!nameField || !nameField.value.trim()) return;
 
             const name = nameField.value.trim();
-            const studentId = idField ? (idField.value.trim() || 'N/A') : 'N/A';
+            const sundaySchoolClass = classField ? (classField.value.trim() || 'N/A') : 'N/A';
+            const lessonTopic = topicField ? (topicField.value.trim() || 'N/A') : 'N/A';
             const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const dateStr = new Date().toLocaleDateString();
 
             const record = {
                 name,
-                studentId,
+                sundaySchoolClass,
+                lessonTopic,
                 timestamp: `${dateStr} ${timestamp}`,
                 code: 'PASS-' + Math.random().toString(36).substring(2, 8).toUpperCase()
             };
@@ -499,7 +525,7 @@
             if (!tbody) return;
             tbody.innerHTML = '';
             if (globalRecords.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500 dark:text-slate-400 font-semibold">No check-ins recorded yet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500 dark:text-slate-400 font-semibold">No check-ins recorded yet.</td></tr>`;
                 return;
             }
 
@@ -508,7 +534,8 @@
                 tr.className = "hover:bg-purple-50/60 dark:hover:bg-slate-800/50 transition-colors";
                 tr.innerHTML = `
                     <td class="p-3 font-extrabold text-slate-800 dark:text-slate-200">${escapeHtml(r.name)}</td>
-                    <td class="p-3 text-slate-600 dark:text-slate-400 font-semibold">${escapeHtml(r.studentId)}</td>
+                    <td class="p-3 text-slate-600 dark:text-slate-400 font-semibold">${escapeHtml(r.sundaySchoolClass || r.studentId || 'N/A')}</td>
+                    <td class="p-3 text-slate-600 dark:text-slate-400 font-semibold">${escapeHtml(r.lessonTopic || 'N/A')}</td>
                     <td class="p-3 text-slate-600 dark:text-slate-400 font-semibold">${escapeHtml(r.timestamp)}</td>
                 `;
                 tbody.appendChild(tr);
@@ -529,9 +556,9 @@
                 return;
             }
 
-            let csvContent = "data:text/csv;charset=utf-8,Name,Student ID / Email,Timestamp,Verification Code\n";
+            let csvContent = "data:text/csv;charset=utf-8,Name,Teacher Name,Lesson Topic,Timestamp,Verification Code\n";
             globalRecords.forEach(r => {
-                csvContent += `"${r.name}","${r.studentId}","${r.timestamp}","${r.code}"\n`;
+                csvContent += `"${r.name}","${r.sundaySchoolClass || r.studentId || 'N/A'}","${r.lessonTopic || 'N/A'}","${r.timestamp}","${r.code}"\n`;
             });
 
             const encodedUri = encodeURI(csvContent);
@@ -553,6 +580,62 @@
 
     <!-- UI Helpers -->
     <script>
+        // Scripture Collection
+        const scriptures = [
+            { text: "Trust in the Lord with all your heart, and do not lean on your own understanding. In all your ways acknowledge him, and he will make straight your paths.", ref: "Proverbs 3:5-6" },
+            { text: "Now faith is the assurance of things hoped for, the conviction of things not seen.", ref: "Hebrews 11:1" },
+            { text: "For we walk by faith, not by sight.", ref: "2 Corinthians 5:7" },
+            { text: "For truly, I say to you, if you have faith like a grain of mustard seed, you will say to this mountain, 'Move from here to there,' and it will move, and nothing will be impossible for you.", ref: "Matthew 17:20" },
+            { text: "But let him ask in faith, with no doubting, for the one who doubts is like a wave of the sea that is driven and tossed by the wind.", ref: "James 1:6" },
+            { text: "Trust in him at all times, O people; pour out your heart before him; God is a refuge for us.", ref: "Psalm 62:8" },
+            { text: "For nothing will be impossible with God.", ref: "Luke 1:37" },
+            { text: "And without faith it is impossible to please him, for whoever would draw near to God must believe that he exists and that he rewards those who seek him.", ref: "Hebrews 11:6" },
+            { text: "So faith comes from hearing, and hearing through the word of Christ.", ref: "Romans 10:17" },
+            { text: "Jesus looked at them and said, 'With man it is impossible, but not with God. For all things are possible with God.'", ref: "Mark 10:27" },
+            { text: "Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your minds in Christ Jesus.", ref: "Philippians 4:6-7" },
+            { text: "Peace I leave with you; my peace I give to you. Not as the world gives do I give to you. Let not your hearts be troubled, neither let them be afraid.", ref: "John 14:27" },
+            { text: "Therefore do not be anxious about tomorrow, for tomorrow will be anxious for itself. Sufficient for the day is its own trouble.", ref: "Matthew 6:34" },
+            { text: "Casting all your anxieties on him, because he cares for you.", ref: "1 Peter 5:7" },
+            { text: "Even though I walk through the valley of the shadow of death, I will fear no evil, for you are with me; your rod and your staff, they comfort me.", ref: "Psalm 23:4" },
+            { text: "God is our refuge and strength, a very present help in trouble.", ref: "Psalm 46:1" },
+            { text: "Come to me, all who labor and are heavy laden, and I will give you rest.", ref: "Matthew 11:28" },
+            { text: "He will cover you with his pinions, and under his wings you will find refuge; his faithfulness is a shield and buckler.", ref: "Psalm 91:4" },
+            { text: "My flesh and my heart may fail, but God is the strength of my heart and my portion forever.", ref: "Psalm 73:26" },
+            { text: "You keep him in perfect peace whose mind is stayed on you, because he trusts in you.", ref: "Isaiah 26:3" },
+            { text: "Have I not commanded you? Be strong and courageous. Do not be frightened, and do not be dismayed, for the Lord your God is with you wherever you go.", ref: "Joshua 1:9" },
+            { text: "I can do all things through him who strengthens me.", ref: "Philippians 4:13" },
+            { text: "Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you, I will uphold you with my righteous right hand.", ref: "Isaiah 41:10" },
+            { text: "For God gave us a spirit not of fear but of power and love and self-control.", ref: "2 Timothy 1:7" },
+            { text: "The Lord is my light and my salvation; whom shall I fear? The Lord is the stronghold of my life; of whom shall I be afraid?", ref: "Psalm 27:1" },
+            { text: "Finally, be strong in the Lord and in the strength of his might.", ref: "Ephesians 6:10" },
+            { text: "The name of the Lord is a strong tower; the righteous man runs into it and is safe.", ref: "Proverbs 18:10" },
+            { text: "But they who wait for the Lord shall renew their strength; they shall mount up with wings like eagles; they shall run and not be weary; they shall walk and not faint.", ref: "Isaiah 40:31" },
+            { text: "Be strong and courageous. Do not fear or be in dread of them, for it is the Lord your God who goes with you. He will not leave you or forsake you.", ref: "Deuteronomy 31:6" },
+            { text: "Be watchful, stand firm in the faith, act like men, be strong.", ref: "1 Corinthians 16:13" }
+        ];
+
+        function getRandomVerse() {
+            const verseTextEl = document.getElementById('verseText');
+            const verseRefEl = document.getElementById('verseRef');
+            if (!verseTextEl || !verseRefEl) return;
+
+            const randomIndex = Math.floor(Math.random() * scriptures.length);
+            const selected = scriptures[randomIndex];
+
+            verseTextEl.style.opacity = '0';
+            verseRefEl.style.opacity = '0';
+
+            setTimeout(() => {
+                verseTextEl.innerText = `"${selected.text}"`;
+                verseRefEl.innerText = `— ${selected.ref}`;
+                verseTextEl.style.opacity = '1';
+                verseRefEl.style.opacity = '1';
+            }, 150);
+        }
+
+        // Initialize first scripture on page load
+        document.addEventListener('DOMContentLoaded', getRandomVerse);
+
         function openLoginModal() {
             document.getElementById('loginModal').classList.remove('hidden');
             document.getElementById('loginUsername').focus();
