@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RCCG - Lesson Check-In</title>
+    <title>SH - Church Attendance Check-In</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -32,62 +32,81 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* Light mode glassmorphism */
-        .glass-light {
-            background: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+        /* Colorful Light mode glassmorphism */
+        .light .glass-custom {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1.5px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.18), 0 0 15px rgba(236, 72, 153, 0.1);
         }
+        
         /* Dark mode glassmorphism */
-        .glass-dark {
-            background: rgba(15, 23, 42, 0.78);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .dark .glass-custom {
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Vibrant Dynamic Background Gradients */
+        .light-bg {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 25%, #d946ef 50%, #ec4899 75%, #06b6d4 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 12s ease infinite;
+        }
+
+        .dark-bg {
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         /* Ambient Glowing Backdrops */
         .glow-orb-1 {
             position: fixed;
             top: -10%;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 30%;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            transition: all 0.5s ease;
+        }
+        .glow-orb-2 {
+            position: fixed;
+            bottom: -10%;
+            right: -5%;
             width: 380px;
             height: 380px;
             border-radius: 50%;
             pointer-events: none;
             z-index: 0;
-            transition: background 0.5s ease;
-        }
-        .glow-orb-2 {
-            position: fixed;
-            bottom: -10%;
-            right: -10%;
-            width: 320px;
-            height: 320px;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            transition: background 0.5s ease;
+            transition: all 0.5s ease;
         }
 
         .dark .glow-orb-1 {
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
         }
         .dark .glow-orb-2 {
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
         }
         .light .glow-orb-1 {
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 70%);
         }
         .light .glow-orb-2 {
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+            background: radial-gradient(circle, rgba(254, 240, 138, 0.4) 0%, rgba(255, 255, 255, 0) 70%);
         }
 
         @keyframes float-subtle {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
         }
         .animate-float {
             animation: float-subtle 4s ease-in-out infinite;
@@ -102,15 +121,15 @@
             background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(156, 163, 175, 0.4);
+            background: rgba(156, 163, 175, 0.5);
             border-radius: 9999px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(156, 163, 175, 0.6);
+            background: rgba(156, 163, 175, 0.75);
         }
     </style>
 </head>
-<body class="bg-slate-900 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased relative overflow-x-hidden transition-colors duration-300">
+<body id="bodyBg" class="light-bg text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased relative overflow-x-hidden transition-all duration-500">
 
     <!-- Ambient Glowing Backdrops -->
     <div class="glow-orb-1"></div>
@@ -118,30 +137,30 @@
 
     <!-- Header -->
     <header class="w-full max-w-lg mx-auto px-4 pt-6 z-10">
-        <div class="glass-light dark:glass-dark rounded-3xl px-5 py-3.5 shadow-2xl flex justify-between items-center transition-all duration-300">
+        <div class="glass-custom rounded-3xl px-5 py-3.5 shadow-2xl flex justify-between items-center transition-all duration-300">
             <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 rounded-2xl bg-white p-1 shadow-md flex items-center justify-center overflow-hidden border border-emerald-500/30 flex-shrink-0">
-                    <img src="https://success-oye.github.io/church/image_1b0cf5.png" alt="RCCG Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/100x100/1e293b/ffffff?text=RCCG'">
+                <div class="w-12 h-12 rounded-2xl bg-white p-1 shadow-md flex items-center justify-center overflow-hidden border-2 border-amber-400 dark:border-emerald-500/40 flex-shrink-0">
+                    <img src="https://success-oye.github.io/church/image_1b0cf5.png" alt="SH Church Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/100x100/4f46e5/ffffff?text=SH'">
                 </div>
                 <div>
                     <div class="flex items-center gap-1.5">
-                        <h1 class="font-black text-slate-900 dark:text-white text-sm tracking-tight leading-none">RCCG</h1>
-                        <span class="text-[9px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Live</span>
+                        <h1 class="font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 dark:from-white dark:to-slate-200 text-lg tracking-tight leading-none">SH</h1>
+                        <span class="text-[9px] bg-gradient-to-r from-amber-400 to-pink-500 text-white font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">Church</span>
                     </div>
-                    <p class="text-[11px] text-indigo-600 dark:text-indigo-400 font-bold mt-0.5">Lesson Attendance</p>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium" id="headerDate">Loading date...</p>
+                    <p class="text-[11px] text-indigo-700 dark:text-indigo-400 font-extrabold mt-0.5">Lesson Attendance</p>
+                    <p class="text-[10px] text-slate-600 dark:text-slate-400 font-semibold" id="headerDate">Loading date...</p>
                 </div>
             </div>
             
             <div class="flex items-center gap-2">
                 <!-- Theme Toggle Button -->
-                <button onclick="toggleTheme()" id="themeToggleBtn" aria-label="Toggle Dark/Light Mode" class="p-2.5 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 transition duration-200 shadow-sm flex items-center justify-center">
-                    <i id="themeIcon" class="fa-solid fa-moon text-xs"></i>
+                <button onclick="toggleTheme()" id="themeToggleBtn" aria-label="Toggle Dark/Light Mode" class="p-2.5 rounded-2xl bg-gradient-to-tr from-amber-300 to-pink-400 dark:from-slate-800 dark:to-slate-700 text-slate-900 dark:text-amber-300 hover:scale-105 active:scale-95 transition duration-200 shadow-md flex items-center justify-center">
+                    <i id="themeIcon" class="fa-solid fa-sun text-xs"></i>
                 </button>
 
                 <!-- Teacher Access Button -->
-                <button onclick="openLoginModal()" id="teacherPortalBtn" class="text-xs bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 active:scale-95 text-white font-bold px-3.5 py-2.5 rounded-2xl shadow-lg transition duration-200 flex items-center gap-2">
-                    <i class="fa-solid fa-user-shield text-xs text-indigo-400 dark:text-indigo-200"></i>
+                <button onclick="openLoginModal()" id="teacherPortalBtn" class="text-xs bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 dark:from-indigo-600 dark:to-purple-600 hover:opacity-95 active:scale-95 text-white font-extrabold px-3.5 py-2.5 rounded-2xl shadow-lg transition duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-user-shield text-xs text-amber-300 dark:text-indigo-200"></i>
                     <span>Teacher</span>
                 </button>
             </div>
@@ -154,30 +173,30 @@
         <!-- STUDENT VIEW -->
         <div id="studentView" class="space-y-5">
             <!-- Welcome Card -->
-            <div class="glass-light dark:glass-dark p-6 rounded-3xl shadow-2xl text-center relative overflow-hidden transition-all duration-300">
-                <div class="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-purple-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg shadow-indigo-500/30 animate-float">
+            <div class="glass-custom p-6 rounded-3xl shadow-2xl text-center relative overflow-hidden transition-all duration-300">
+                <div class="w-16 h-16 bg-gradient-to-tr from-amber-400 via-pink-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg shadow-pink-500/30 animate-float">
                     <i class="fa-solid fa-church"></i>
                 </div>
-                <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Welcome to Class!</h2>
-                <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-xs mx-auto font-medium">Please enter your details below to mark your attendance for today's session.</p>
+                <h2 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-900 via-purple-900 to-pink-800 dark:from-white dark:to-slate-200 tracking-tight">Welcome to Church!</h2>
+                <p class="text-xs text-slate-700 dark:text-slate-300 mt-1 max-w-xs mx-auto font-semibold">Please enter your details below to mark your attendance for today's session.</p>
             </div>
 
             <!-- Check-in Form Card -->
-            <div id="formCard" class="glass-light dark:glass-dark p-6 rounded-3xl shadow-2xl transition-all duration-300">
+            <div id="formCard" class="glass-custom p-6 rounded-3xl shadow-2xl transition-all duration-300">
                 <form id="checkInForm" onsubmit="handleCheckIn(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-user text-indigo-600 dark:text-indigo-400"></i> Full Name <span class="text-rose-500">*</span>
+                        <label class="block text-xs font-black uppercase tracking-wider text-indigo-950 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-user text-pink-500 dark:text-indigo-400"></i> Full Name <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" id="studentName" required placeholder="e.g. John Doe" class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold transition shadow-inner">
+                        <input type="text" id="studentName" required placeholder="e.g. John Doe" class="w-full px-4 py-3.5 rounded-2xl border-2 border-indigo-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm font-semibold transition shadow-inner">
                     </div>
                     <div>
-                        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-id-card text-indigo-600 dark:text-indigo-400"></i> Student ID or Email <span class="text-slate-400 dark:text-slate-500 font-normal">(Optional)</span>
+                        <label class="block text-xs font-black uppercase tracking-wider text-indigo-950 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-id-card text-purple-600 dark:text-indigo-400"></i> Student ID or Email <span class="text-slate-500 dark:text-slate-400 font-normal">(Optional)</span>
                         </label>
-                        <input type="text" id="studentId" placeholder="e.g. S10294 or user@domain.com" class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold transition shadow-inner">
+                        <input type="text" id="studentId" placeholder="e.g. S10294 or user@domain.com" class="w-full px-4 py-3.5 rounded-2xl border-2 border-indigo-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-semibold transition shadow-inner">
                     </div>
-                    <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 active:scale-[0.98] text-white font-extrabold py-4 rounded-2xl shadow-xl shadow-indigo-500/30 transition duration-200 text-sm flex items-center justify-center gap-2 tracking-wide">
+                    <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 active:scale-[0.98] text-white font-black py-4 rounded-2xl shadow-xl shadow-pink-500/30 transition duration-200 text-sm flex items-center justify-center gap-2 tracking-wider uppercase">
                         <span>Confirm Attendance</span>
                         <i class="fa-solid fa-paper-plane text-xs"></i>
                     </button>
@@ -185,20 +204,20 @@
             </div>
 
             <!-- Success Confirmation Card -->
-            <div id="successCard" class="hidden glass-light dark:glass-dark p-6 rounded-3xl shadow-2xl text-center space-y-4 border-2 border-emerald-400/80 dark:border-emerald-500/80 transition-all duration-300">
+            <div id="successCard" class="hidden glass-custom p-6 rounded-3xl shadow-2xl text-center space-y-4 border-2 border-emerald-400 dark:border-emerald-500/80 transition-all duration-300">
                 <div class="w-16 h-16 bg-gradient-to-tr from-emerald-400 to-teal-500 text-white rounded-full flex items-center justify-center mx-auto text-2xl shadow-lg shadow-emerald-500/40">
                     <i class="fa-solid fa-check"></i>
                 </div>
                 <div>
-                    <h3 class="text-2xl font-black text-slate-900 dark:text-white">Welcome to class!</h3>
-                    <p class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-1">We are so glad you are here with us. 😊✝️</p>
-                    <p id="successMessage" class="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium"></p>
+                    <h3 class="text-2xl font-black text-slate-900 dark:text-white">Welcome to church!</h3>
+                    <p class="text-sm font-extrabold text-purple-700 dark:text-indigo-400 mt-1">We are so glad you are here with us. 😊✝️</p>
+                    <p id="successMessage" class="text-xs text-slate-700 dark:text-slate-300 mt-1 font-semibold"></p>
                 </div>
-                <div class="bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 p-3.5 rounded-2xl text-xs font-mono text-emerald-900 dark:text-emerald-200 font-semibold inline-block shadow-sm">
-                    Verification Code: <span id="verificationCode" class="text-emerald-700 dark:text-emerald-400 font-black"></span>
+                <div class="bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-950/80 dark:to-teal-950/80 border-2 border-emerald-300 dark:border-emerald-800 p-3.5 rounded-2xl text-xs font-mono text-emerald-900 dark:text-emerald-200 font-extrabold inline-block shadow-sm">
+                    Verification Badge: <span id="verificationCode" class="text-emerald-700 dark:text-emerald-400 font-black"></span>
                 </div>
                 <div>
-                    <button type="button" onclick="resetForm()" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-bold underline mt-2 transition">
+                    <button type="button" onclick="resetForm()" class="text-xs text-purple-700 dark:text-indigo-400 hover:text-pink-600 dark:hover:text-indigo-300 font-extrabold underline mt-2 transition">
                         Check in another person
                     </button>
                 </div>
@@ -207,56 +226,56 @@
 
         <!-- TEACHER DASHBOARD VIEW -->
         <div id="teacherView" class="hidden space-y-5">
-            <div class="glass-light dark:glass-dark p-5 rounded-3xl shadow-2xl flex justify-between items-center transition-all duration-300">
+            <div class="glass-custom p-5 rounded-3xl shadow-2xl flex justify-between items-center transition-all duration-300">
                 <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-purple-500/30">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 via-pink-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-purple-500/30">
                         <i class="fa-solid fa-user-shield"></i>
                     </div>
                     <div>
-                        <h3 class="font-extrabold text-slate-900 dark:text-white text-sm">Teacher Dashboard</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Logged in as <strong class="text-indigo-600 dark:text-indigo-400">deacon</strong></p>
+                        <h3 class="font-black text-slate-900 dark:text-white text-sm">Teacher Dashboard</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 font-medium">Logged in as <strong class="text-pink-600 dark:text-indigo-400 font-extrabold">deacon</strong></p>
                     </div>
                 </div>
-                <button onclick="exitTeacherView()" class="text-xs bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold px-3.5 py-2 rounded-xl transition">
+                <button onclick="exitTeacherView()" class="text-xs bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-extrabold px-3.5 py-2 rounded-xl transition">
                     Logout
                 </button>
             </div>
 
             <!-- QR Code Card -->
-            <div class="glass-light dark:glass-dark p-6 rounded-3xl shadow-2xl text-center flex flex-col items-center transition-all duration-300">
+            <div class="glass-custom p-6 rounded-3xl shadow-2xl text-center flex flex-col items-center transition-all duration-300">
                 <h3 class="font-extrabold text-slate-900 dark:text-white text-sm mb-1">Classroom QR Code</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-xs">Project or print this code for students to scan with their mobile devices.</p>
-                <div id="qrcode" class="p-4 bg-white rounded-2xl shadow-lg border border-slate-100 mb-3 flex items-center justify-center"></div>
-                <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500 break-all max-w-xs" id="currentUrlDisplay"></p>
+                <p class="text-xs text-slate-600 dark:text-slate-400 mb-4 max-w-xs font-medium">Project or print this code for students to scan with their mobile devices.</p>
+                <div id="qrcode" class="p-4 bg-white rounded-2xl shadow-lg border-2 border-indigo-100 dark:border-slate-800 mb-3 flex items-center justify-center"></div>
+                <p class="text-[10px] font-mono text-slate-500 dark:text-slate-400 break-all max-w-xs font-bold" id="currentUrlDisplay"></p>
             </div>
 
             <!-- Attendance Roster -->
-            <div class="glass-light dark:glass-dark p-6 rounded-3xl shadow-2xl space-y-4 transition-all duration-300">
+            <div class="glass-custom p-6 rounded-3xl shadow-2xl space-y-4 transition-all duration-300">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h3 class="font-extrabold text-slate-900 dark:text-white text-sm">Live Attendance Roster</h3>
-                        <p class="text-xs text-indigo-600 dark:text-indigo-400 font-extrabold" id="totalCount">0 students checked in</p>
+                        <h3 class="font-black text-slate-900 dark:text-white text-sm">Live Attendance Roster</h3>
+                        <p class="text-xs text-purple-700 dark:text-indigo-400 font-black" id="totalCount">0 students checked in</p>
                     </div>
                     <div class="space-x-1.5 flex items-center">
-                        <button onclick="exportCSV()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-2 rounded-xl transition shadow-sm flex items-center gap-1">
+                        <button onclick="exportCSV()" class="text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-extrabold px-3.5 py-2 rounded-xl transition shadow-md flex items-center gap-1">
                             <i class="fa-solid fa-download"></i> CSV
                         </button>
-                        <button onclick="clearData()" class="text-xs bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-200 dark:hover:bg-rose-900 text-rose-700 dark:text-rose-300 font-bold px-3.5 py-2 rounded-xl transition">
+                        <button onclick="clearData()" class="text-xs bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-200 dark:hover:bg-rose-900 text-rose-700 dark:text-rose-300 font-extrabold px-3.5 py-2 rounded-xl transition">
                             Clear
                         </button>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto max-h-60 overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-2xl bg-white/60 dark:bg-slate-900/60 shadow-inner">
+                <div class="overflow-x-auto max-h-60 overflow-y-auto border-2 border-indigo-100 dark:border-slate-800 rounded-2xl bg-white/70 dark:bg-slate-900/60 shadow-inner">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-100/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 font-black uppercase sticky top-0 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
+                        <thead class="bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-slate-800 dark:to-slate-800 text-slate-800 dark:text-slate-200 font-black uppercase sticky top-0 backdrop-blur-sm border-b border-indigo-200 dark:border-slate-700">
                             <tr>
                                 <th class="p-3">Name</th>
                                 <th class="p-3">ID / Email</th>
                                 <th class="p-3">Time</th>
                             </tr>
                         </thead>
-                        <tbody id="rosterTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                        <tbody id="rosterTableBody" class="divide-y divide-indigo-50 dark:divide-slate-800 font-medium">
                             <!-- Injected by JS -->
                         </tbody>
                     </table>
@@ -268,77 +287,83 @@
 
     <!-- TEACHER LOGIN MODAL -->
     <div id="loginModal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="glass-light dark:glass-dark max-w-sm w-full p-6 rounded-3xl shadow-2xl relative space-y-4 transition-all duration-300">
+        <div class="glass-custom max-w-sm w-full p-6 rounded-3xl shadow-2xl relative space-y-4 transition-all duration-300">
             <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg transition">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div class="text-center">
-                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl font-bold shadow-inner">
+                <div class="w-12 h-12 bg-gradient-to-tr from-purple-500 to-pink-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl font-bold shadow-md">
                     <i class="fa-solid fa-lock"></i>
                 </div>
                 <h3 class="text-lg font-black text-slate-900 dark:text-white">Teacher Portal</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Please enter credentials to access admin controls.</p>
+                <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-medium">Please enter credentials to access admin controls.</p>
             </div>
             <form onsubmit="handleTeacherLogin(event)" class="space-y-3">
                 <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">Username</label>
-                    <input type="text" id="loginUsername" required placeholder="Enter username" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none font-medium">
+                    <label class="block text-[11px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">Username</label>
+                    <input type="text" id="loginUsername" required placeholder="Enter username" class="w-full px-3.5 py-2.5 rounded-xl border border-indigo-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none font-semibold">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">Password</label>
-                    <input type="password" id="loginPassword" required placeholder="Enter password" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none font-medium">
+                    <label class="block text-[11px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="Enter password" class="w-full px-3.5 py-2.5 rounded-xl border border-indigo-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none font-semibold">
                 </div>
-                <p id="loginError" class="hidden text-xs text-rose-600 dark:text-rose-400 font-bold text-center"></p>
-                <button type="submit" class="w-full bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-md text-sm transition">
+                <p id="loginError" class="hidden text-xs text-rose-600 dark:text-rose-400 font-extrabold text-center"></p>
+                <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black py-3 rounded-xl shadow-lg text-sm transition hover:opacity-95">
                     Unlock Dashboard
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Notification / Toast Message -->
+    <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-        <div id="toastInner" class="bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold flex items-center gap-2">
+        <div id="toastInner" class="bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 border border-white/20">
             <i id="toastIcon" class="fa-solid fa-circle-info"></i>
             <span id="toastText">Notification message</span>
         </div>
     </div>
 
-    <footer class="text-center py-4 text-[11px] text-slate-500 dark:text-indigo-200/60 font-medium z-10">
-        RCCG GitHub Pages Lesson Attendance System
+    <footer class="text-center py-4 text-[11px] text-white/90 dark:text-slate-400 font-bold z-10 drop-shadow-sm">
+        SH Church GitHub Pages Lesson Attendance System
     </footer>
 
-    <!-- Theme Logic (Pre-script for theme initialization) -->
+    <!-- Theme Initialization Script -->
     <script>
         function applyInitialTheme() {
-            const savedTheme = localStorage.getItem('rccg_theme');
+            const savedTheme = localStorage.getItem('sh_church_theme');
             const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             
             if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
                 document.documentElement.classList.add('dark');
                 document.documentElement.classList.remove('light');
+                document.getElementById('bodyBg').className = "dark-bg text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased relative overflow-x-hidden transition-all duration-500";
                 updateThemeUI(true);
             } else {
                 document.documentElement.classList.add('light');
                 document.documentElement.classList.remove('dark');
+                document.getElementById('bodyBg').className = "light-bg text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased relative overflow-x-hidden transition-all duration-500";
                 updateThemeUI(false);
             }
         }
 
         function toggleTheme() {
             const isDark = document.documentElement.classList.contains('dark');
+            const bodyBg = document.getElementById('bodyBg');
+
             if (isDark) {
                 document.documentElement.classList.remove('dark');
                 document.documentElement.classList.add('light');
-                localStorage.setItem('rccg_theme', 'light');
+                bodyBg.className = "light-bg text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased relative overflow-x-hidden transition-all duration-500";
+                localStorage.setItem('sh_church_theme', 'light');
                 updateThemeUI(false);
             } else {
                 document.documentElement.classList.add('dark');
                 document.documentElement.classList.remove('light');
-                localStorage.setItem('rccg_theme', 'dark');
+                bodyBg.className = "dark-bg text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased relative overflow-x-hidden transition-all duration-500";
+                localStorage.setItem('sh_church_theme', 'dark');
                 updateThemeUI(true);
             }
-            // Re-render QR Code with adjusted dark colors if QR exists
+
             if (typeof window.generateQRCode === 'function' && window.qrGenerated) {
                 window.generateQRCode(true);
             }
@@ -348,9 +373,9 @@
             const icon = document.getElementById('themeIcon');
             if (icon) {
                 if (isDark) {
-                    icon.className = 'fa-solid fa-sun text-amber-400 text-xs';
+                    icon.className = 'fa-solid fa-sun text-amber-300 text-xs';
                 } else {
-                    icon.className = 'fa-solid fa-moon text-indigo-600 text-xs';
+                    icon.className = 'fa-solid fa-moon text-indigo-950 text-xs';
                 }
             }
         }
@@ -358,7 +383,7 @@
         applyInitialTheme();
     </script>
 
-    <!-- Firebase SDK & Core Logic Module -->
+    <!-- Firebase Modular SDK v10.8.0 & Application Core -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -382,7 +407,7 @@
 
         let globalRecords = [];
 
-        // Set date
+        // Header Date Setup
         const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
         document.getElementById('headerDate').innerText = new Date().toLocaleDateString(undefined, options);
 
@@ -401,7 +426,7 @@
                     text: currentUrl,
                     width: 160,
                     height: 160,
-                    colorDark : isDark ? "#0f172a" : "#1e1b4b",
+                    colorDark : isDark ? "#0f172a" : "#4f46e5",
                     colorLight : "#ffffff",
                     correctLevel : QRCode.CorrectLevel.H
                 });
@@ -409,7 +434,7 @@
             }
         };
 
-        // Realtime Listener for Live Roster
+        // Realtime Database Listener for Live Roster
         onValue(attendanceRef, (snapshot) => {
             const data = snapshot.val();
             globalRecords = [];
@@ -447,9 +472,10 @@
                 playChime();
                 if (typeof confetti === 'function') {
                     confetti({
-                        particleCount: 110,
-                        spread: 70,
-                        origin: { y: 0.6 }
+                        particleCount: 120,
+                        spread: 80,
+                        origin: { y: 0.6 },
+                        colors: ['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b']
                     });
                 }
 
@@ -473,17 +499,17 @@
             if (!tbody) return;
             tbody.innerHTML = '';
             if (globalRecords.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 dark:text-slate-500 font-normal">No check-ins recorded yet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500 dark:text-slate-400 font-semibold">No check-ins recorded yet.</td></tr>`;
                 return;
             }
 
             globalRecords.forEach(r => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors";
+                tr.className = "hover:bg-purple-50/60 dark:hover:bg-slate-800/50 transition-colors";
                 tr.innerHTML = `
-                    <td class="p-3 font-semibold text-slate-800 dark:text-slate-200">${escapeHtml(r.name)}</td>
-                    <td class="p-3 text-slate-500 dark:text-slate-400">${escapeHtml(r.studentId)}</td>
-                    <td class="p-3 text-slate-500 dark:text-slate-400">${escapeHtml(r.timestamp)}</td>
+                    <td class="p-3 font-extrabold text-slate-800 dark:text-slate-200">${escapeHtml(r.name)}</td>
+                    <td class="p-3 text-slate-600 dark:text-slate-400 font-semibold">${escapeHtml(r.studentId)}</td>
+                    <td class="p-3 text-slate-600 dark:text-slate-400 font-semibold">${escapeHtml(r.timestamp)}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -511,7 +537,7 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `rccg_attendance_${new Date().toISOString().slice(0,10)}.csv`);
+            link.setAttribute("download", `sh_church_attendance_${new Date().toISOString().slice(0,10)}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -525,7 +551,7 @@
         }
     </script>
 
-    <!-- UI Helper Script -->
+    <!-- UI Helpers -->
     <script>
         function openLoginModal() {
             document.getElementById('loginModal').classList.remove('hidden');
@@ -595,7 +621,7 @@
                 osc2.start(now + 0.15);
                 osc2.stop(now + 0.8);
             } catch(e) {
-                console.log("Audio not allowed or supported on this context.");
+                console.log("Audio playback not supported or restricted.");
             }
         }
 
@@ -620,7 +646,7 @@
             } else if (type === 'success') {
                 toastIcon.className = "fa-solid fa-circle-check text-emerald-400";
             } else {
-                toastIcon.className = "fa-solid fa-circle-info text-indigo-400";
+                toastIcon.className = "fa-solid fa-circle-info text-pink-400";
             }
 
             toast.classList.remove('translate-y-20', 'opacity-0');
