@@ -531,8 +531,11 @@
         const analytics = getAnalytics(app);
         const db = getDatabase(app);
         const attendanceRef = ref(db, 'attendance');
+        // Firebase location used to store the teacher's check-in validation window.
+        const validationWindowRef = ref(db, 'settings/attendanceWindow');
 
         let globalRecords = [];
+        let validationWindow = { enabled: false, start: '09:00', end: '12:00' };
 
         // Header Date Setup
         const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
@@ -1037,46 +1040,70 @@
         // Initialize first scripture on page load
         document.addEventListener('DOMContentLoaded', window.getRandomVerse);
 
-        function openLoginModal() {
-            document.getElementById('loginModal').classList.remove('hidden');
-            document.getElementById('loginUsername').focus();
-        }
+        // Expose dashboard controls explicitly on window so inline HTML handlers
+        // continue to work reliably alongside the Firebase ES module.
+        window.openLoginModal = function() {
+            const modal = document.getElementById('loginModal');
+            const username = document.getElementById('loginUsername');
+            const error = document.getElementById('loginError');
+            if (!modal || !username) return;
+            modal.classList.remove('hidden');
+            if (error) error.classList.add('hidden');
+            username.focus();
+        };
 
-        function closeLoginModal() {
-            document.getElementById('loginModal').classList.add('hidden');
-            document.getElementById('loginError').classList.add('hidden');
-        }
+        window.closeLoginModal = function() {
+            const modal = document.getElementById('loginModal');
+            const error = document.getElementById('loginError');
+            if (modal) modal.classList.add('hidden');
+            if (error) error.classList.add('hidden');
+        };
 
-        function handleTeacherLogin(event) {
-            event.preventDefault();
-            const user = document.getElementById('loginUsername').value.trim();
-            const pass = document.getElementById('loginPassword').value.trim();
+        window.handleTeacherLogin = function(event) {
+            if (event) event.preventDefault();
+            const username = document.getElementById('loginUsername');
+            const password = document.getElementById('loginPassword');
+            const errorEl = document.getElementById('loginError');
+            if (!username || !password || !errorEl) return false;
+
+            const user = username.value.trim();
+            const pass = password.value;
 
             if (user === 'deacon' && pass === 'jesus') {
-                closeLoginModal();
-                showTeacherView();
-                document.getElementById('loginUsername').value = '';
-                document.getElementById('loginPassword').value = '';
+                window.closeLoginModal();
+                window.showTeacherView();
+                username.value = '';
+                password.value = '';
             } else {
-                const errorEl = document.getElementById('loginError');
-                errorEl.innerText = 'Invalid username or password.';
+                errorEl.textContent = 'Invalid username or password.';
                 errorEl.classList.remove('hidden');
+                password.focus();
+                password.select();
             }
-        }
+            return false;
+        };
 
-        function showTeacherView() {
-            document.getElementById('studentView').classList.add('hidden');
-            document.getElementById('teacherView').classList.remove('hidden');
-            document.getElementById('teacherPortalBtn').classList.add('hidden');
+        window.showTeacherView = function() {
+            const studentView = document.getElementById('studentView');
+            const teacherView = document.getElementById('teacherView');
+            const portalButton = document.getElementById('teacherPortalBtn');
+            if (!studentView || !teacherView || !portalButton) return;
+            studentView.classList.add('hidden');
+            teacherView.classList.remove('hidden');
+            portalButton.classList.add('hidden');
             if (typeof window.generateQRCode === 'function') window.generateQRCode();
             if (typeof window.loadRoster === 'function') window.loadRoster();
-        }
+            if (typeof window.syncValidationControls === 'function') window.syncValidationControls();
+        };
 
-        function exitTeacherView() {
-            document.getElementById('teacherView').classList.add('hidden');
-            document.getElementById('studentView').classList.remove('hidden');
-            document.getElementById('teacherPortalBtn').classList.remove('hidden');
-        }
+        window.exitTeacherView = function() {
+            const teacherView = document.getElementById('teacherView');
+            const studentView = document.getElementById('studentView');
+            const portalButton = document.getElementById('teacherPortalBtn');
+            if (teacherView) teacherView.classList.add('hidden');
+            if (studentView) studentView.classList.remove('hidden');
+            if (portalButton) portalButton.classList.remove('hidden');
+        };
 
         function playChime() {
             try {
