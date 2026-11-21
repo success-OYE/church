@@ -333,4 +333,131 @@
             if (now < start) {
                 form.style.display = "none";
                 lockedBox.style.display = "block";
-                lockedBox.innerHTML = `⏳ <strong>Check-in Not Open
+                lockedBox.innerHTML = `⏳ <strong>Check-in Not Open Yet</strong><br>This lesson opens on ${formatReadableDate(lessonData.validFrom)}.`;
+                badge.className = "status-badge status-upcoming";
+                badge.textContent = "Upcoming Lesson";
+            } else if (now > end) {
+                form.style.display = "none";
+                lockedBox.style.display = "block";
+                lockedBox.innerHTML = `🔒 <strong>Lesson Attendance Closed</strong><br>Check-in ended on ${formatReadableDate(lessonData.validUntil)}.`;
+                badge.className = "status-badge status-expired";
+                badge.textContent = "Session Closed";
+            } else {
+                form.style.display = "block";
+                lockedBox.style.display = "none";
+                badge.className = "status-badge status-active";
+                badge.textContent = "● Active – Open for Check-in";
+            }
+        }
+
+        function generateQRCode() {
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shareUrl = `${baseUrl}?title=${encodeURIComponent(lessonData.title)}&loc=${encodeURIComponent(lessonData.location)}&from=${encodeURIComponent(lessonData.validFrom)}&until=${encodeURIComponent(lessonData.validUntil)}`;
+
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, {
+                text: shareUrl,
+                width: 150,
+                height: 150,
+                colorDark: "#2c3e50",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        }
+
+        // Student Check-in Submission
+        document.getElementById("attendanceForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const name = document.getElementById("fullName").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const records = JSON.parse(localStorage.getItem("churchAttendanceRecords") || "[]");
+            records.push({
+                name,
+                email,
+                lesson: lessonData.title,
+                time: new Date().toLocaleString()
+            });
+            localStorage.setItem("churchAttendanceRecords", JSON.stringify(records));
+
+            document.getElementById("attendanceForm").style.display = "none";
+            const successDiv = document.getElementById("successMessage");
+            successDiv.innerHTML = `✓ Attendance Recorded for <strong>${name}</strong> at ${timeNow}!`;
+            successDiv.style.display = "block";
+            renderAttendeeList();
+        });
+
+        // Teacher Portal Controls
+        function openTeacherLogin() {
+            const pin = prompt("Enter Teacher PIN (Default: 1234):");
+            if (pin === TEACHER_PIN) {
+                document.getElementById("teacherPortal").style.display = "block";
+            } else if (pin !== null) {
+                alert("Incorrect PIN.");
+            }
+        }
+
+        function closeTeacherPortal() {
+            document.getElementById("teacherPortal").style.display = "none";
+        }
+
+        function saveLessonSettings() {
+            lessonData.title = document.getElementById("editTitle").value;
+            lessonData.location = document.getElementById("editLocation").value;
+            lessonData.validFrom = document.getElementById("editFrom").value;
+            lessonData.validUntil = document.getElementById("editUntil").value;
+
+            localStorage.setItem("churchLessonSettings", JSON.stringify(lessonData));
+            renderDisplay();
+            checkValidityWindow();
+            generateQRCode();
+            alert("Lesson settings & QR code updated!");
+        }
+
+        function renderAttendeeList() {
+            const records = JSON.parse(localStorage.getItem("churchAttendanceRecords") || "[]");
+            document.getElementById("attendeeCount").textContent = records.length;
+            const listEl = document.getElementById("attendeeList");
+
+            if (records.length === 0) {
+                listEl.innerHTML = "No check-ins recorded yet.";
+                return;
+            }
+
+            listEl.innerHTML = records.map(r => `
+                <div class="attendee-item">
+                    <span><strong>${r.name}</strong></span>
+                    <span style="color:#777;">${r.time}</span>
+                </div>
+            `).join("");
+        }
+
+        function exportCSV() {
+            const records = JSON.parse(localStorage.getItem("churchAttendanceRecords") || "[]");
+            if (records.length === 0) return alert("No attendance records to export.");
+
+            let csv = "Name,Email,Lesson,Timestamp\n";
+            records.forEach(r => {
+                csv += `"${r.name}","${r.email}","${r.lesson}","${r.time}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: "text/csv" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "church-attendance.csv";
+            a.click();
+        }
+
+        function clearRecords() {
+            if (confirm("Are you sure you want to delete all saved attendance records?")) {
+                localStorage.removeItem("churchAttendanceRecords");
+                renderAttendeeList();
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", initApp);
+    </script>
+</body>
+</html>
