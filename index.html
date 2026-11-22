@@ -200,26 +200,7 @@
                         <label class="block text-xs font-black uppercase tracking-wider text-indigo-950 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
                             <i class="fa-solid fa-user text-purple-600 dark:text-indigo-400"></i> <span data-i18n="labelFullName">Full Name</span> <span class="text-rose-500">*</span>
                         </label>
-                        <div class="flex items-center gap-2">
-                            <input type="text" id="studentName" required placeholder="e.g. John Doe" class="min-w-0 flex-1 w-full px-4 py-3.5 rounded-2xl border-2 border-indigo-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-semibold transition shadow-inner">
-                            <button type="button" id="childrenToggleBtn" onclick="toggleChildrenCount()" aria-expanded="false" aria-controls="childrenCountPanel" title="Add children" class="shrink-0 w-12 h-12 rounded-2xl bg-purple-600 hover:bg-purple-700 active:scale-95 text-white flex items-center justify-center shadow-lg transition">
-                                <i id="childrenToggleIcon" class="fa-solid fa-plus"></i>
-                            </button>
-                        </div>
-                        <div id="childrenCountPanel" class="hidden mt-3 rounded-2xl border border-purple-200 dark:border-slate-700 bg-purple-50/80 dark:bg-slate-800/70 p-3">
-                            <label for="childrenCount" class="block text-xs font-black text-purple-900 dark:text-slate-100 mb-2">How many children are accompanying you?</label>
-                            <select id="childrenCount" class="w-full px-3 py-3 rounded-xl border-2 border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-purple-500">
-                                <option value="1">1 child</option>
-                                <option value="2">2 children</option>
-                                <option value="3">3 children</option>
-                                <option value="4">4 children</option>
-                                <option value="5">5 children</option>
-                                <option value="6">6 children</option>
-                                <option value="7">7 children</option>
-                                <option value="8">8 children</option>
-                                <option value="9">9 children</option>
-                            </select>
-                        </div>
+                        <input type="text" id="studentName" required placeholder="e.g. John Doe" class="w-full px-4 py-3.5 rounded-2xl border-2 border-indigo-200/80 dark:border-slate-700 bg-white/95 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-semibold transition shadow-inner">
                     </div>
                     <div>
                         <label class="block text-xs font-black uppercase tracking-wider text-indigo-950 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
@@ -294,7 +275,7 @@
                 </button>
             </div>
 
-            <!-- Attendance Check-in Validation Window -->
+            <!-- Attendance Check-in Validation Window (UK time) -->
             <div class="glass-custom p-5 rounded-3xl shadow-2xl space-y-4">
                 <div>
                     <h3 class="font-black text-slate-900 dark:text-white text-sm flex items-center gap-2">
@@ -302,7 +283,7 @@
                         Attendance Validation Time
                     </h3>
                     <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                        Choose when students are allowed to check in. Times use the device's local time.
+                        Choose when students are allowed to check in. Times use UK time (GMT in winter, BST in summer), whatever the device's timezone.
                     </p>
                 </div>
                 <label class="flex items-center gap-3 text-xs font-bold text-slate-800 dark:text-slate-200">
@@ -311,11 +292,11 @@
                 </label>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label for="validationStart" class="block text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Validation time (from)</label>
+                        <label for="validationStart" class="block text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Start time (UK)</label>
                         <input id="validationStart" type="time" value="09:00" class="w-full px-3 py-2.5 rounded-xl border border-indigo-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-bold">
                     </div>
                     <div>
-                        <label for="validationEnd" class="block text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Until</label>
+                        <label for="validationEnd" class="block text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Until (UK)</label>
                         <input id="validationEnd" type="time" value="12:00" class="w-full px-3 py-2.5 rounded-xl border border-indigo-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-bold">
                     </div>
                 </div>
@@ -613,16 +594,29 @@
             window.updateStudentCheckInState();
         });
 
+        // Current minutes since midnight in UK time (GMT in winter, BST in summer)
+        function getUKMinutes(now = new Date()) {
+            const parts = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Europe/London',
+                hour: '2-digit',
+                minute: '2-digit',
+                hourCycle: 'h23'
+            }).formatToParts(now);
+            const h = parseInt(parts.find(p => p.type === 'hour').value, 10) % 24;
+            const m = parseInt(parts.find(p => p.type === 'minute').value, 10);
+            return h * 60 + m;
+        }
+
         function isWithinValidationWindow(now = new Date()) {
             if (!validationWindow.enabled) return true;
-            if (!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(validationWindow.start) ||
-                !/^([01]\\d|2[0-3]):[0-5]\\d$/.test(validationWindow.end)) return false;
+            if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(validationWindow.start) ||
+                !/^([01]\d|2[0-3]):[0-5]\d$/.test(validationWindow.end)) return false;
 
             const toMinutes = value => {
                 const [hours, minutes] = value.split(':').map(Number);
                 return hours * 60 + minutes;
             };
-            const current = now.getHours() * 60 + now.getMinutes();
+            const current = getUKMinutes(now);
             const start = toMinutes(validationWindow.start);
             const end = toMinutes(validationWindow.end);
 
@@ -645,9 +639,9 @@
             message.classList.toggle('hidden', allowed);
 
             if (!allowed) {
-                message.textContent = `Attendance check-in is closed. The allowed time is ${validationWindow.start} until ${validationWindow.end}. Please try again during that period.`;
+                message.textContent = `Attendance check-in is closed. The allowed time is ${validationWindow.start} until ${validationWindow.end} (UK time). Please try again during that period.`;
             } else if (validationWindow.enabled) {
-                message.textContent = `Check-in is open from ${validationWindow.start} until ${validationWindow.end}.`;
+                message.textContent = `Check-in is open from ${validationWindow.start} until ${validationWindow.end} (UK time).`;
             }
         };
 
@@ -661,7 +655,7 @@
             if (end) end.value = validationWindow.end;
             if (status) {
                 status.textContent = validationWindow.enabled
-                    ? `Validation is ON: students can check in from ${validationWindow.start} until ${validationWindow.end}.`
+                    ? `Validation is ON: students can check in from ${validationWindow.start} until ${validationWindow.end} (UK time).`
                     : 'Check-in time validation is OFF. Students can check in at any time.';
             }
         };
@@ -704,10 +698,6 @@
             if (!nameField || !nameField.value.trim()) return;
 
             const name = nameField.value.trim();
-            const childrenPanel = document.getElementById('childrenCountPanel');
-            const childrenCount = childrenPanel && !childrenPanel.classList.contains('hidden')
-                ? Math.min(9, Math.max(1, Number(document.getElementById('childrenCount')?.value || 1)))
-                : 0;
             const sundaySchoolClass = classField ? (classField.value.trim() || 'N/A') : 'N/A';
             const lessonTopic = topicField ? (topicField.value.trim() || 'N/A') : 'N/A';
             const prayerNotes = prayerField ? prayerField.value.trim() : '';
@@ -717,7 +707,6 @@
 
             const record = {
                 name,
-                childrenCount,
                 sundaySchoolClass,
                 lessonTopic,
                 type,
@@ -754,17 +743,15 @@
             const statMembers = document.getElementById('statMembers');
             const statVisitors = document.getElementById('statVisitors');
 
-            const headcount = r => 1 + Math.max(0, Math.min(9, Number(r.childrenCount) || 0));
-            const members = globalRecords.filter(r => r.type !== 'Visitor').reduce((sum, r) => sum + headcount(r), 0);
-            const visitors = globalRecords.filter(r => r.type === 'Visitor').reduce((sum, r) => sum + headcount(r), 0);
-            const totalPeople = globalRecords.reduce((sum, r) => sum + headcount(r), 0);
+            const members = globalRecords.filter(r => r.type !== 'Visitor').length;
+            const visitors = globalRecords.filter(r => r.type === 'Visitor').length;
 
-            if (statTotal) statTotal.innerText = totalPeople;
+            if (statTotal) statTotal.innerText = globalRecords.length;
             if (statMembers) statMembers.innerText = members;
             if (statVisitors) statVisitors.innerText = visitors;
 
             if (totalCountEl) {
-                totalCountEl.innerText = `${totalPeople} ${totalPeople === 1 ? 'person' : 'people'} checked in (${globalRecords.length} check-in${globalRecords.length === 1 ? '' : 's'})`;
+                totalCountEl.innerText = `${globalRecords.length} student${globalRecords.length === 1 ? '' : 's'} checked in`;
             }
             
             filterRoster();
@@ -797,7 +784,7 @@
 
                 tr.innerHTML = `
                     <td class="p-3">${badge}</td>
-                    <td class="p-3 font-extrabold text-slate-800 dark:text-slate-200">${escapeHtml(r.name)}${Number(r.childrenCount) > 0 ? `<span class="block mt-1 text-[10px] font-bold text-purple-600 dark:text-indigo-300">+ ${Number(r.childrenCount)} ${Number(r.childrenCount) === 1 ? 'child' : 'children'}</span>` : ''}</td>
+                    <td class="p-3 font-extrabold text-slate-800 dark:text-slate-200">${escapeHtml(r.name)}</td>
                     <td class="p-3 text-slate-600 dark:text-slate-400 font-semibold">${escapeHtml(r.sundaySchoolClass || r.studentId || 'N/A')}</td>
                     <td class="p-3 text-slate-600 dark:text-slate-400 font-semibold">${escapeHtml(r.lessonTopic || 'N/A')}</td>
                     <td class="p-3 text-slate-600 dark:text-slate-400 font-semibold">${escapeHtml(r.timestamp)}</td>
@@ -857,9 +844,9 @@
                 return;
             }
 
-            let csvContent = "data:text/csv;charset=utf-8,Type,Full Name,Children,Teacher Name,Lesson Topic,Prayer Notes,Timestamp,Verification Code\n";
+            let csvContent = "data:text/csv;charset=utf-8,Type,Name,Teacher Name,Lesson Topic,Prayer Notes,Timestamp,Verification Code\n";
             globalRecords.forEach(r => {
-                csvContent += `"${r.type || 'Member'}","${r.name}","${Number(r.childrenCount) || 0}","${r.sundaySchoolClass || r.studentId || 'N/A'}","${r.lessonTopic || 'N/A'}","${r.prayerNotes || ''}","${r.timestamp}","${r.code}"\n`;
+                csvContent += `"${r.type || 'Member'}","${r.name}","${r.sundaySchoolClass || r.studentId || 'N/A'}","${r.lessonTopic || 'N/A'}","${r.prayerNotes || ''}","${r.timestamp}","${r.code}"\n`;
             });
 
             const encodedUri = encodeURI(csvContent);
@@ -1162,28 +1149,9 @@
             }
         }
 
-        window.toggleChildrenCount = function() {
-            const panel = document.getElementById('childrenCountPanel');
-            const button = document.getElementById('childrenToggleBtn');
-            const icon = document.getElementById('childrenToggleIcon');
-            if (!panel || !button) return;
-            const willOpen = panel.classList.contains('hidden');
-            panel.classList.toggle('hidden', !willOpen);
-            button.setAttribute('aria-expanded', String(willOpen));
-            button.setAttribute('title', willOpen ? 'Remove children count' : 'Add children');
-            if (icon) icon.className = willOpen ? 'fa-solid fa-minus' : 'fa-solid fa-plus';
-        };
-
         function resetForm() {
             const form = document.getElementById('checkInForm');
             if (form) form.reset();
-            const childrenPanel = document.getElementById('childrenCountPanel');
-            const childrenButton = document.getElementById('childrenToggleBtn');
-            const childrenIcon = document.getElementById('childrenToggleIcon');
-            if (childrenPanel) childrenPanel.classList.add('hidden');
-            if (childrenButton) childrenButton.setAttribute('aria-expanded', 'false');
-            if (childrenButton) childrenButton.setAttribute('title', 'Add children');
-            if (childrenIcon) childrenIcon.className = 'fa-solid fa-plus';
             const customTeacherInput = document.getElementById('customTeacherInput');
             if (customTeacherInput) {
                 customTeacherInput.classList.add('hidden');
